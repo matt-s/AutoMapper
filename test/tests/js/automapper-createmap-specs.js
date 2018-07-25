@@ -204,6 +204,25 @@ var AutoMapperJs;
             // assert
             expect(objB).toEqualData({ prop1: objA.prop1, prop: objA.prop2 });
         });
+        it('should be able to use forMember to do custom mapping using lambda function', function () {
+            //arrange
+            var objA = { prop1: 'From A', prop2: 'From A too' };
+            var fromKey = '{7AC4134B-ECC1-464B-B144-5B9D8F5B578E}';
+            var toKey = '{2BDE907C-1CE6-4CC5-A601-9A94CC665737}';
+            var mapFromNullable = function (opts, field) {
+                if (opts.sourceObject[field]) {
+                    return opts.sourceObject[field];
+                }
+                return '';
+            };
+            automapper
+                .createMap(fromKey, toKey)
+                .forMember('prop', function (opts) { return mapFromNullable(opts, 'prop2'); });
+            // act
+            var objB = automapper.map(fromKey, toKey, objA);
+            // assert
+            expect(objB).toEqualData({ prop1: objA.prop1, prop: objA.prop2 });
+        });
         it('should use forAllMembers function for each mapped destination property when specified', function () {
             // arrange
             var objA = { prop1: 'From A', prop2: 'From A too' };
@@ -439,6 +458,20 @@ var AutoMapperJs;
             expect(objB instanceof DemoToBusinessType).toBeTruthy();
             expect(objB.property).toEqual(objA.ApiProperty);
         });
+        it('should be able to use convertToType to map a source object to a destination object with default values defined', function () {
+            //arrange
+            var objA = { propA: 'another value' };
+            var fromKey = '{7AC4134B-ECC1-464B-B144-5C9D8F5B5A7E}';
+            var toKey = '{2BDE907C-1CE6-4CC5-A601-9A94CA6C4737}';
+            automapper
+                .createMap(fromKey, toKey)
+                .convertToType(ClassWithDefaultValues);
+            // act
+            var objB = automapper.map(fromKey, toKey, objA);
+            // assert
+            expect(objB instanceof ClassWithDefaultValues).toBeTruthy();
+            expect(objB.propA).toEqual(objA.propA);
+        });
         it('should be able to use a condition to map or ignore a property', function () {
             // arrange
             var objA = { prop: 1, prop2: 2 };
@@ -621,11 +654,11 @@ var AutoMapperJs;
             // assert
             expect(objB).toBeNull();
         });
-        it('should be able to create a new property using a constant value (null source object)', function () {
+        it('should be able to create a new property using a constant value (empty source object)', function () {
             // arrange
-            var objA = null;
+            var objA = {};
             var fromKey = 'should be able to create a new property ';
-            var toKey = 'using a constant value (null source object)';
+            var toKey = 'using a constant value (empty source object)';
             // act
             automapper
                 .createMap(fromKey, toKey)
@@ -764,6 +797,12 @@ var AutoMapperJs;
             this.propA = null;
         }
         return ClassC;
+    }());
+    var ClassWithDefaultValues = (function () {
+        function ClassWithDefaultValues() {
+            this.propA = 'default value';
+        }
+        return ClassWithDefaultValues;
     }());
     var DemoToBusinessType = (function () {
         function DemoToBusinessType() {

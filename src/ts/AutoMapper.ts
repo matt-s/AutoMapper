@@ -106,14 +106,14 @@ module AutoMapperJs {
 
             // provide performance optimized (preloading) currying support.
             if (arguments.length === 2) {
-                return (srcObj: any) => this.mapInternal(super.getMapping(this._mappings, sourceKeyOrType, destinationKeyOrType), srcObj);
+                return (srcObj: any): any => this.mapInternal(super.getMapping(this._mappings, sourceKeyOrType, destinationKeyOrType), srcObj);
             }
 
             if (arguments.length === 1) {
-                return (dstKey: string | (new () => any), srcObj: any) => this.map(sourceKeyOrType, dstKey, srcObj);
+                return (dstKey: string | (new () => any), srcObj: any): any => this.map(sourceKeyOrType, dstKey, srcObj);
             }
 
-            return (srcKey: string | (new () => any), dstKey: string | (new () => any), srcObj: any) => this.map(srcKey, dstKey, srcObj);
+            return (srcKey: string | (new () => any), dstKey: string | (new () => any), srcObj: any): any => this.map(srcKey, dstKey, srcObj);
         }
 
         /**
@@ -167,7 +167,7 @@ module AutoMapperJs {
         }
 
         private createMapConvertUsing(mapping: IMapping, tcClassOrFunc: convertUsingClassOrInstanceOrFunction): void {
-            var configureSynchronousConverterFunction = (converterFunc: any) => {
+            var configureSynchronousConverterFunction = (converterFunc: any): void => {
                 if (!converterFunc || AutoMapperHelper.getFunctionParameters(converterFunc.toString()).length !== 1) {
                     throw new Error('The function provided does not provide exactly one (resolutionContext) parameter.');
                 }
@@ -261,6 +261,10 @@ module AutoMapperJs {
         }
 
         private mapInternal(mapping: IMapping, sourceObject: any): any {
+            if (sourceObject === null || typeof sourceObject === 'undefined') {
+                return sourceObject;
+            }
+
             if (mapping.async) {
                 throw new Error('Impossible to use asynchronous mapping using automapper.map(); use automapper.mapAsync() instead.');
             }
@@ -703,7 +707,7 @@ module AutoMapperJs {
 }
 
 // Add AutoMapper to the application's global scope. Of course, you could still use Core.AutoMapper.getInstance() as well.
-var automapper: AutoMapperJs.AutoMapper = ((app: any) => {
+var automapper: AutoMapperJs.AutoMapper = ((app: any): AutoMapperJs.AutoMapper => {
     app.automapper = AutoMapperJs.AutoMapper.getInstance();
     return app.automapper;
 })(this);
